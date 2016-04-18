@@ -79,6 +79,24 @@
         .leaflet-popup-content {
             max-width: 160px;   
         }
+        #ui-controls {   
+            margin-left: 10%;
+        }
+        #ui-controls label {
+            font-size: 1em;
+            margin-right: 5px;
+        }
+        .info {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            text-align: right;   
+        }
+        .info h3 {
+            margin: 0;   
+        }
         
     </style>
 </head>
@@ -88,31 +106,52 @@
         <h1>Map Title</h1>
         <h2>Map Subtitle</h2>
     </header>
+    
+    <!-- create UI controls div and set up values -->
+    <div id='ui-controls'>
+        <label>Choose a data attribute:</label>
+       <select id="occupied">
+            <option value="OWNED_MORT" selected>Mortage</option>
+            <option value="OWNED_FREE">No Mortage</option>
+            <option value="RENTER">Rented</option>
+        </select>
+    </div> 
 
     <div id='map'></div>
 
     <footer>
-        <p>Map authored by YOUR NAME</p>
+        <p>Map authored by Elizabeth Adams</p>
         <p>Additional information about the data and map goes here.</p>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis urna magna, maximus nec laoreet sit amet, dictum ultricies nibh. Ut id auctor lacus. Nam a dolor et justo luctus luctus. Duis a elit eget risus dictum vehicula id eu elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed sed enim nisl. Vestibulum commodo imperdiet lacus, sed facilisis erat placerat sit amet. Nulla consequat malesuada neque eget aliquet. Integer non convallis nisl, gravida ultrices ex. Fusce nec vestibulum elit. Sed elementum lectus ipsum, vulputate elementum ex laoreet a. Aenean eu ex varius, varius felis vitae, efficitur nulla. Quisque pretium laoreet ante, in sodales dui vehicula at. Mauris eu sem sapien.
         </p>
     </footer>
 
     <script>
-        
+        //specify map parameters
         var options = {
             center: [37.8, -85.8],
             zoom: 7.4,
+            minZoom: 7.4,
+            maxZoom: 7.4,
+            dragging: false,
             zoomControl: false
         }
         var map = L.map('map', options);
         
-        map.addControl( L.control.zoom({ position: 'topright' }));
         
+        //designate values for attribute and norm(what will display on the map)
         var dataLayer,
             attribute = "OWNED_MORT",
             norm = "OCCUPIED";
         
+        var labels = {
+            "OCCUPIED": "occupied units",
+            "OWNED_MORT": "% occupied housing units owned with mortgage",
+            "OWNED_FREE": "% occupied housing units owned free and clear",
+            "RENTER": "% occupied housing units rented"   
+        }
+        
+        //retrieve data to display on map, add data to map, dictate how the map should look, and call drawMap function
         $.getJSON("ky_counties_housing.json", function(data) {
             
             dataLayer = L.geoJson(data, {
@@ -126,10 +165,14 @@
                 }          
             }).addTo(map);
             
+            drawInfo();
+            drawLegend();
             drawMap();
+            buildUI();
               
         });
         
+        //determine brakes based on getClassBreaks function, set the style of the daat layer, bind a popup to the data layer, and call drawLegend function
         function drawMap() {
             
             var breaks = getClassBreaks();
@@ -143,13 +186,29 @@
                                         props[norm], breaks)
                 });
                 layer.bindPopup("<b>"+props["NAME"]+" County</b></br>" +
-                                attribute + ": " +
+                                labels[attribute] + ": " +
                                 ((props[attribute]/props[norm])*100).toLocaleString()+"%");  
+                
+                            
+                layer.on('mouseover', function(){
+                     updateInfo(this);
+                    
+                    $('.info').show();
+                     
+                });
+                
+                layer.on('mouseout', function(){
+                     updateInfo(this);
+                     
+                    $('.info').hide();
+                });
+                
             });
             
-            drawLegend(breaks);
+            updateLegend(breaks);
         }
         
+        //create array of desired data values, use their mean to cerate 5 breaks, and use to detemrine data breaks ranges
         function getClassBreaks() {
             
             var values = [];
@@ -169,6 +228,7 @@
             
         }   
         
+        // determine display colors
         function getColor(d, breaks) {
             
             if(d <= breaks[0][1]) {
@@ -184,32 +244,77 @@
             }
         }
         
-        function drawLegend(breaks) {
+        // create and format legend, and add to the map div
+        function drawLegend() {
             
             var legend = L.control({position: 'topleft'});
 
-            legend.onAdd = function () {
+            legend.onAdd = function (map) {
                 
                 var div = L.DomUtil.create('div', 'legend');
                 
-                div.innerHTML = "<h3>" + attribute + " per " + norm + "</h3>"; 
-
-                for (var i = 0; i < breaks.length; i++) {
-            
-                    var color = getColor(breaks[i][0], breaks);
-                    
-                    div.innerHTML +=
-                        '<span style="background:' + color + '"></span> ' +
-                        '<label>'+(breaks[i][0]*100).toLocaleString() + ' &mdash; ' + 
-                        (breaks[i][1]*100).toLocaleString() + '</label>';
-                }
-               
-                return div;
-                
+                return div;    
                     
             };
 
             legend.addTo(map);
+        }
+        
+        //tells what to do when UI selection changes - update attribute and draw the map again
+        function buildUI(){
+            
+            $('select[id="occupied"]').change(function(){
+                attribute = $(this).val();
+                drawMap();
+            });
+        }
+        
+        //update Legend content based on user's UI selection
+        function updateLegend(breaks){
+            
+            var legend = $('.legend');
+            
+            legend.html("<h3>" + labels[attribute] + " per " + labels[norm] + "</h3>"); 
+
+            for (var i = 0; i < breaks.length; i++) {
+            
+                var color = getColor(breaks[i][0], breaks);
+                    
+                legend.append(
+                        '<span style="background:' + color + '"></span> ' +
+                        '<label>'+(breaks[i][0]*100).toLocaleString() + ' &mdash; ' + 
+                        (breaks[i][1]*100).toLocaleString() + '</label>');
+                }    
+        }
+        
+        //create info panel in top right corner of map
+        function drawInfo(){
+            
+            var info = L.control( { positon: 'topright'} );
+            
+            info.onAdd = function(map){
+                
+                var div = L.DomUtil.create('div', 'info');
+                
+                return div;
+            }
+            
+            info.addTo(map);
+            $('.info').hide();
+        }
+        
+        //update info panel
+        function updateInfo(layer){
+            var props = layer.feature.properties;
+            
+            var html = "<h3>"+props['NAME']+" County</h3>"+
+                        "total # occupied units: <b>"+ props["OCCUPIED"]+"</B><BR>"+
+                        "# owned with mortage or loan: <b>"+ props["OWNED_MORT"]+"</b><br>"+
+                        "# owned free and clear: <b>"+ props["OWNED_FREE"]+"</b><br>"+
+                        "# occupied by renters: <b>"+ props["RENTER"]+"</B>"
+            
+            $(".info").html(html);
+            
         }
 
     </script>
