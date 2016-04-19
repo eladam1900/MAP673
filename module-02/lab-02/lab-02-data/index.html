@@ -71,6 +71,9 @@
         .legend label {
             font-size: 1.1em;
         }
+        .legend h3 b {
+            font-size: 1.2em;
+        }
         .legend label:after {
             content: '';
             display: block;
@@ -110,10 +113,14 @@
     <!-- create UI controls div and set up values -->
     <div id='ui-controls'>
         <label>Choose a data attribute:</label>
-       <select id="occupied">
-            <option value="OWNED_MORT" selected>Mortage</option>
-            <option value="OWNED_FREE">No Mortage</option>
-            <option value="RENTER">Rented</option>
+       <select id="vacancy">
+            <option value="VACANT_MIG">Migrant Workers' Units</option>
+            <option value="VACANT_SEA">Seasonal or Recreational Unite</option>
+            <option value="VACANT_SOL" selected>Sold not Occupied</option>
+            <option value="VACANT_FOR">For Rent</option>
+            <option value="VACANT_REN">Rented not Occupied</option>
+            <option value="VACANT_FO2">For Sale Only</option>  
+            <option value="VACANT_OTH">Other</option>         
         </select>
     </div> 
 
@@ -121,8 +128,8 @@
 
     <footer>
         <p>Map authored by Elizabeth Adams</p>
-        <p>Additional information about the data and map goes here.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis urna magna, maximus nec laoreet sit amet, dictum ultricies nibh. Ut id auctor lacus. Nam a dolor et justo luctus luctus. Duis a elit eget risus dictum vehicula id eu elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed sed enim nisl. Vestibulum commodo imperdiet lacus, sed facilisis erat placerat sit amet. Nulla consequat malesuada neque eget aliquet. Integer non convallis nisl, gravida ultrices ex. Fusce nec vestibulum elit. Sed elementum lectus ipsum, vulputate elementum ex laoreet a. Aenean eu ex varius, varius felis vitae, efficitur nulla. Quisque pretium laoreet ante, in sodales dui vehicula at. Mauris eu sem sapien.
+        <p>Data were obtained through American Fact Finder(http://factfinder.census.gov/); 2010 Census, SF1</p>
+        <p>Takeing a closer look at vacancy rates in Kentucky. Hover over the counties for a full break down of vacancy rates. Click on counties for specific percentage rates of selected vacancy category. 
         </p>
     </footer>
 
@@ -136,22 +143,27 @@
             dragging: false,
             zoomControl: false
         }
+        
         var map = L.map('map', options);
         
-        
-        //designate values for attribute and norm(what will display on the map)
+        //designate values for attribute and norm
         var dataLayer,
-            attribute = "OWNED_MORT",
-            norm = "OCCUPIED";
+            attribute = "VACANT_SOL",
+            norm = "VACANT";
         
-        var labels = {
-            "OCCUPIED": "occupied units",
-            "OWNED_MORT": "% occupied housing units owned with mortgage",
-            "OWNED_FREE": "% occupied housing units owned free and clear",
-            "RENTER": "% occupied housing units rented"   
+        //define labels for each vacancy category
+        var labels = {  
+            "VACANT_MIG": "% vacant units used for "+"<b>"+"Migrant Workers'"+"</b>", 
+            "VACANT_SEA": "% vacant units used for "+"<b>"+"Seasonal or Recreational"+"</b>"+" use",
+            "VACANT_SOL": "% vacant units "+"<b>"+"Sold but Not Occupied"+"</b>",
+            "VACANT_FOR": "% vacant units "+"<b>"+"For Rent"+"</b>",
+            "VACANT_REN": "% vacant units "+"<b>"+"Rented but Not Occupied"+"</b>",
+            "VACANT_FO2": "% vacant units "+"<b>"+"For Sale"+"</b>",  
+            "VACANT_OTH": "% vacant units for "+"<b>"+"Other reasons"+"</b>",   
+            "VACANT": "total number of vacant units"
         }
         
-        //retrieve data to display on map, add data to map, dictate how the map should look, and call drawMap function
+        //retrieve data to display on map, add data to map, dictate how the map should look, and call other functions
         $.getJSON("ky_counties_housing.json", function(data) {
             
             dataLayer = L.geoJson(data, {
@@ -172,7 +184,7 @@
               
         });
         
-        //determine brakes based on getClassBreaks function, set the style of the daat layer, bind a popup to the data layer, and call drawLegend function
+        //determine brakes based on the getClassBreaks function, set the style of the data layer, bind a popup to the data layer
         function drawMap() {
             
             var breaks = getClassBreaks();
@@ -189,11 +201,18 @@
                                 labels[attribute] + ": " +
                                 ((props[attribute]/props[norm])*100).toLocaleString()+"%");  
                 
-                            
+                //turn on and off info panel and county strokes based on mouse over and out of the data layer            
                 layer.on('mouseover', function(){
                      updateInfo(this);
                     
                     $('.info').show();
+                    
+                    layer.setStyle({
+                       color: '#6efced',    
+                        weight: 6,
+                        opacity: 1
+                        
+                    });
                      
                 });
                 
@@ -201,10 +220,17 @@
                      updateInfo(this);
                      
                     $('.info').hide();
+                    
+                    layer.setStyle({
+                        color: '#dddddd',
+                        weight: 2
+                        
+                    });
                 });
                 
             });
             
+            //update legend based on the breaks variable above
             updateLegend(breaks);
         }
         
@@ -228,7 +254,7 @@
             
         }   
         
-        // determine display colors
+        // define breaks' colors
         function getColor(d, breaks) {
             
             if(d <= breaks[0][1]) {
@@ -260,33 +286,6 @@
             legend.addTo(map);
         }
         
-        //tells what to do when UI selection changes - update attribute and draw the map again
-        function buildUI(){
-            
-            $('select[id="occupied"]').change(function(){
-                attribute = $(this).val();
-                drawMap();
-            });
-        }
-        
-        //update Legend content based on user's UI selection
-        function updateLegend(breaks){
-            
-            var legend = $('.legend');
-            
-            legend.html("<h3>" + labels[attribute] + " per " + labels[norm] + "</h3>"); 
-
-            for (var i = 0; i < breaks.length; i++) {
-            
-                var color = getColor(breaks[i][0], breaks);
-                    
-                legend.append(
-                        '<span style="background:' + color + '"></span> ' +
-                        '<label>'+(breaks[i][0]*100).toLocaleString() + ' &mdash; ' + 
-                        (breaks[i][1]*100).toLocaleString() + '</label>');
-                }    
-        }
-        
         //create info panel in top right corner of map
         function drawInfo(){
             
@@ -303,16 +302,46 @@
             $('.info').hide();
         }
         
-        //update info panel
+        //tells what to do when UI selection changes - update attribute and draw the map again
+        function buildUI(){
+            
+            $('select[id="vacancy"]').change(function(){
+                attribute = $(this).val();
+                drawMap();
+            });
+        }
+        
+        //update Legend content based on user's UI selection
+        function updateLegend(breaks){
+            
+            var legend = $('.legend');
+            
+            legend.html("<h3>" + labels[attribute] + " per "+ labels[norm] + "</h3>"); 
+
+            for (var i = 0; i < breaks.length; i++) {
+            
+                var color = getColor(breaks[i][0], breaks);
+                    
+                legend.append(
+                        '<span style="background:' + color + '"></span> ' +
+                        '<label>'+(breaks[i][0]*100).toLocaleString() + ' &mdash; ' + 
+                        (breaks[i][1]*100).toLocaleString() + '</label>');
+                }    
+        }
+    
+        //update info panel and define content
         function updateInfo(layer){
             var props = layer.feature.properties;
             
             var html = "<h3>"+props['NAME']+" County</h3>"+
-                        "total # occupied units: <b>"+ props["OCCUPIED"]+"</B><BR>"+
-                        "# owned with mortage or loan: <b>"+ props["OWNED_MORT"]+"</b><br>"+
-                        "# owned free and clear: <b>"+ props["OWNED_FREE"]+"</b><br>"+
-                        "# occupied by renters: <b>"+ props["RENTER"]+"</B>"
-            
+                        "total # vacant units: <b>"+ props["VACANT"]+"</B><BR>"+
+                        "# vacant used for migrant workers: <b>"+ props["VACANT_MIG"]+"</b><br>"+
+                        "# vacant used for seasonal and recreational activities: <b>"+ props["VACANT_SEA"]+"</b><br>"+
+                        "# vacant sold but not occupied: <b>"+ props["VACANT_SOL"]+"</b><br>"+
+                        "# vacant for rent: <b>"+ props["VACANT_FOR"]+"</b><br>"+            
+                        "# vacant rented but not occupied: <b>"+ props["VACANT_REN"]+"</b><br>"+   
+                        "# vacant for sale: <b>"+ props["VACANT_FO2"]+"</b><br>"+             
+                        "# vacant for other reasons: <b>"+ props["VACANT_OTH"]+"</b>"               
             $(".info").html(html);
             
         }
