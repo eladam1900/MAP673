@@ -26,8 +26,16 @@
             padding: 6px 10%;
         }
         h1 {
+            position: absolute;
+            z-index: 100;
+            top: 10px;
+            left: 60px;
             padding: 8px 15px;
-            margin: 0; 
+            margin: 0;
+            color: whitesmoke;
+            font-size: 1.5em;
+            background: rgba(25,25,25,0.8);
+            border-radius: 5px; 
         }
         #map {
             position: absolute;
@@ -80,8 +88,6 @@
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
             border-radius: 5px;
             color: whitesmoke;
-            position: absolute;
-            z-index: 100;
         }
         #ui-controls .min {
             float: left;
@@ -93,14 +99,22 @@
         .year-slider {
             width: 100%;
         }
+        label{
+            font-size: 1.1em;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
     <h1>Map Title Goes Here</h1>
     <div id='map'></div>
+    
     <div id='ui-controls'>
+        <label><span class="min">2001</span><span class="max">2013</span></span>
         <input type='range' min='2001' max='2013' value='2001' step='1' class='year-slider'>
+        </input>
+        </label>
     </div>
     
     <script>
@@ -127,7 +141,8 @@
         map.addLayer(tiles);
         
         // declare global variables
-        var dataLayer;
+        var dataLayer,   
+            attribute = 2001;
         
          // AJAX requests to load data files
         $.getJSON('us-states.json', function(states){
@@ -173,7 +188,7 @@
             dataLayer = L.geoJson(states, {
                 style:function(feature) {
                     return {
-                        color: 'white',
+                        color: 'black',
                         weight: 1,
                         fillOpacity: 1,
                         fillColor: '#1f78b4'
@@ -183,6 +198,7 @@
             }).addTo(map);
             
             updateMap();
+            
         }
         
         // function to update the map
@@ -192,10 +208,12 @@
             
             dataLayer.eachLayer(function(layer) {
                     layer.setStyle( {
-                        fillColor: getColor(Number(layer.feature.properties['2001']), breaks)
+                        fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
                      })
                 });
+            
             updateLegend(breaks);
+            
         }
         
         // function get the class breaks   
@@ -204,11 +222,11 @@
            var values = [];
            
            dataLayer.eachLayer(function(layer) {
-               var value = Number(layer.feature.properties['2001']);
+               var value = Number(layer.feature.properties[attribute]);
                values.push(value);
            });
           
-          var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
+           var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
            
            return breaks;
        }
@@ -247,7 +265,7 @@
         // function to update the legend
         function updateLegend(breaks) {
             
-            var legend = $('.legend').html("<h3>% Unemployment: " + '2001' + "</h3><ul>");
+            var legend = $('.legend').html("<h3>% Unemployment: " + attribute + "</h3><ul>");
             
             for (var i = 0; i < breaks.length-1; i++) {
                 var color = getColor(breaks[i+ 1], breaks);
@@ -276,7 +294,12 @@
             }
             
             sliderControl.addTo(map);
-            
+    
+            $('.year-slider')
+                .on('input change', function(){
+                attribute = $(this).val();
+                updateMap();
+            });
         }
 
     </script>
