@@ -3,7 +3,7 @@
 
 <head>
     <meta charset=utf-8 />
-    <title>Lab 03 Starter file</title>
+    <title>Lab 03 - KY Unemployment</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
@@ -37,6 +37,18 @@
             background: rgba(25,25,25,0.8);
             border-radius: 5px; 
         }
+        h2 {
+            position: absolute;
+            z-index: 100;
+            top: 60px;
+            left: 60px;
+            padding: 8px 15px;
+            margin: 0;
+            color: whitesmoke;
+            font-size: 1em;
+            background: rgba(25,25,25,0.8);
+            border-radius: 5px; 
+        }
         #map {
             position: absolute;
             width: 100%;
@@ -54,11 +66,11 @@
         .legend{
             padding: 6px 8px;
             font-size: 1em;
-            background: rgba(75,57,75,0.8);
+            background: rgba(75,75,75,0.8);
             color: whitesmoke;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
             border-radius: 5px;
-            width: 160px;
+            width: 170px;
         }
         .legend h3{
             font-size: 1.1em;
@@ -103,30 +115,47 @@
             font-size: 1.1em;
             font-weight: bold;
         }
+         .info {
+            padding: 6px 8px;
+            font-size: 1em;
+            color: whitesmoke;
+            background: rgba(75,75,75,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            text-align: right;   
+        }
+        .info h3 {
+            margin: 0;   
+        }
+        .leaflet-popup-content {
+            max-width: 160px;   
+        }
     </style>
 </head>
 
 <body>
-    <h1>Map Title Goes Here</h1>
+    <h1>Kentucky Unemployment Rate</h1>
+    <h2>2000 to 2013</h2>
+    
     <div id='map'></div>
     
+    <-- year-slider setup 
     <div id='ui-controls'>
-        <label><span class="min">2001</span><span class="max">2013</span></span>
-        <input type='range' min='2001' max='2013' value='2001' step='1' class='year-slider'>
-        </input>
+        <label><span class="min">2000</span><span class="max">2013</span>
+        <input type='range' min='2000' max='2013' value='2000' step='1' class='year-slider'>
         </label>
     </div>
     
     <script>
         
-         // instantiate the Leaflet map
+        // instantiate the Leaflet map
         var options = {
             center: [37.8, -85.8],
-            zoom: 4,
-            minZoom: 4,
-            maxZoom: 6,
+            zoom: 8,
+            minZoom: 8,
+            maxZoom: 8,
             dragging: true,
-            zoomControl: true
+            zoomControl: false
         }
         var map = L.map('map', options);
         
@@ -142,7 +171,7 @@
         
         // declare global variables
         var dataLayer,   
-            attribute = 2001;
+            attribute = 2000;
         
          // AJAX requests to load data files
         $.getJSON('ky-counties.json', function(counties){
@@ -151,7 +180,7 @@
                 download: true,
                 header: true,
                 complete: function(data) {
-                                                    //console.log(data.data[0].NAME) 
+                                                     
                     processData(counties, data);
                     
                 }
@@ -163,23 +192,26 @@
         function processData(counties,data) {
             
             for( var i=0; i < counties.features.length; i++){
-                                                                    console.log(counties.features[i].properties)
+                                                                   
                 var props = counties.features[i].properties;
-              
-                //for(var i=0; i < data.data.length; i++) {
+                                                                   
+                for(var d in data.data) {
                     
-                    if(props.NAME === data.data[i].NAME) {
-                        
-                        counties.features[i].properties = data.data[i];
+                    if(props.NAME === data.data[d].NAME) {
+                                                                    
+                        counties.features[i].properties = data.data[d];
                         break;
-                    }                                               console.log(data.data[i])
-              //  } //end of inner loop
+                    }                                               
+                } //end of inner loop
                 
             } // end of outer loop
-
-            drawMap(counties);
-            drawLegend();
-            createsliderUI();
+                
+                
+                drawLegend();
+                drawInfo();
+                drawMap(counties);
+           
+                createsliderUI();
         }
 
          // function to draw the map
@@ -210,8 +242,43 @@
                     layer.setStyle( {
                         fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
                      })
-                });
+           
+            //build pop-up        
+            layer.bindPopup("<b>"+layer.feature.properties['NAME']+" County</b></br>" +
+                            "Unemployment rate in " + attribute + ": " + Number(layer.feature.properties[attribute]));  
+                
+                //update info window at mouse over
+                layer.on('mouseover', function(){
+                     updateInfo(this);
+                    
+                    $('.info').show();
+                    
+                    //highlight county color
+                    layer.setStyle({
+                       color: 'white',    
+                        weight: 1.5,
+                        opacity: 1
+                        
+                    });
+                     
+                });  
             
+               layer.on('mouseout', function(){
+                     updateInfo(this);
+                     
+                    $('.info').hide();
+                    
+                   //return county settings
+                    layer.setStyle({
+                        color: 'black',
+                        weight: 0.5,
+                        fillColor: getColor(Number(layer.feature.properties[attribute]), breaks)
+                        
+                    });
+                });
+                
+            });
+                        
             updateLegend(breaks);
             
         }
@@ -219,11 +286,12 @@
         // function get the class breaks   
        function getClassBreaks() {
            
-           var values = [];
-           
+            var values = [];
+          
            dataLayer.eachLayer(function(layer) {
-               var value = Number(layer.feature.properties[attribute]);
+                var value = Number(layer.feature.properties[attribute]);
                values.push(value);
+               
            });
           
            var breaks = ss.quantile(values, [0, 0.2, 0.4, 0.6, 0.8, 1]);
@@ -234,15 +302,15 @@
         // function to get the color value
          function getColor(d, breaks){
              if(d <= breaks[1]) {
-                 return '#f2f0f7';
+                 return '#f6eff7';
              }else if(d <= breaks[2]) {
-                 return '#cbc9e2';
+                 return '#bdc9e1';
              }else if(d <= breaks[3]) {
-                 return '#9e9ac8';
+                 return '#67a9cf';
              }else if(d <= breaks[4]) {
-                 return '#756bb1';
+                 return '#1c9099';
              }else if(d <= breaks[5]) {
-                 return '#54278f';
+                 return '#016c59';
              }
             
         }
@@ -262,18 +330,59 @@
             legend.addTo(map);
         }
         
+        //create info panel in top right corner of map
+        function drawInfo(){
+            
+            var info = L.control( { positon: 'topright'} );
+            
+            info.onAdd = function(map){
+                
+                var div = L.DomUtil.create('div', 'info');
+                
+                return div;
+            }
+            
+            info.addTo(map);
+            $('.info').hide();
+        }
+        
         // function to update the legend
         function updateLegend(breaks) {
             
-            var legend = $('.legend').html("<h3>% Unemployment: " + attribute + "</h3><ul>");
+            var legend = $('.legend').html("<h3> Unemployment Rate: " + attribute + "</h3><ul>");
             
             for (var i = 0; i < breaks.length-1; i++) {
                 var color = getColor(breaks[i+ 1], breaks);
                     $('.legend ul').append('<li><span style="background:' + color +'"></span> ' +
-                                          breaks[i] + ' &mdash; ' +
-                                          breaks[i + 1] + '</li>');
+                                          breaks[i].toLocaleString() + ' &mdash; ' +
+                                          breaks[i + 1].toLocaleString()  + " %" + '</li>');
             }
+        
             legend.append("</ul>");
+            
+        }
+        
+        //update info panel and define content
+        function updateInfo(layer){
+            var props = layer.feature.properties;
+            
+            var html = "<h3>"+props['NAME']+" County</h3>"+
+                        "2000: <b>"+ props["2000"]+" %"+"</b><br>"+
+                        "2001: <b>"+ props["2001"]+" %"+"</b><br>"+
+                        "2002: <b>"+ props["2002"]+" %"+"</b><br>"+
+                        "2003: <b>"+ props["2003"]+" %"+"</b><br>"+
+                        "2004: <b>"+ props["2004"]+" %"+"</b><br>"+
+                        "2005: <b>"+ props["2005"]+" %"+"</b><br>"+   
+                        "2006: <b>"+ props["2006"]+" %"+"</b><br>"+
+                        "2007: <b>"+ props["2007"]+" %"+"</b><br>"+
+                        "2008: <b>"+ props["2008"]+" %"+"</b><br>"+  
+                        "2009: <b>"+ props["2009"]+" %"+"</b><br>"+
+                        "2010: <b>"+ props["2010"]+" %"+"</b><br>"+
+                        "2011: <b>"+ props["2011"]+" %"+"</b><br>"+
+                        "2012: <b>"+ props["2012"]+" %"+"</b><br>"+
+                        "2013: <b>"+ props["2013"]+" %"+"</b>"   
+                        
+            $(".info").html(html);
             
         }
 
