@@ -111,9 +111,8 @@
     <div id='map'></div>
     
     <div id='ui-controls'>
-        <label><span class="min">2001</span><span class="max">2013</span></span>
+        <label><span class="min">2001</span><span class="max">2013</span>
         <input type='range' min='2001' max='2013' value='2001' step='1' class='year-slider'>
-        </input>
         </label>
     </div>
     
@@ -130,7 +129,7 @@
         }
         var map = L.map('map', options);
         
-         //load map tiles
+        // load map tiles
         var tiles = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}.{ext}', {
 	                   attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a                                                  href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 	                   subdomains: 'abcd',
@@ -151,7 +150,9 @@
                 download: true,
                 header: true,
                 complete: function(data) {
-                                                    //console.log(data.data[0].NAME) 
+                    
+                    //console.log(data.data[0].NAME) 
+                  
                     processData(counties, data);
                     
                 }
@@ -163,22 +164,24 @@
         function processData(counties,data) {
             
             for( var i=0; i < counties.features.length; i++){
-                                                                    console.log(counties.features[i].properties)
+                
+                //console.log(counties.features[i].properties)
                 var props = counties.features[i].properties;
               
-                //for(var i=0; i < data.data.length; i++) {
+                for(var j=0; j < data.data.length; j++) {
                     
-                    if(props.NAME === data.data[i].NAME) {
+                    if(props.NAME === data.data[j].NAME) {
                         
-                        counties.features[i].properties = data.data[i];
+                        counties.features[j].properties = data.data[j];
                         break;
-                    }                                               console.log(data.data[i])
-              //  } //end of inner loop
+                    }
+                    //console.log(data.data[i])
+                } //end of inner loop
                 
             } // end of outer loop
-
-            drawMap(counties);
+            console.log(counties)
             drawLegend();
+            drawMap(counties);
             createsliderUI();
         }
 
@@ -187,6 +190,7 @@
             
             dataLayer = L.geoJson(states, {
                 style:function(feature) {
+                    
                     return {
                         color: 'black',
                         weight: 1,
@@ -264,6 +268,7 @@
         
         // function to update the legend
         function updateLegend(breaks) {
+            
             
             var legend = $('.legend').html("<h3>% Unemployment: " + attribute + "</h3><ul>");
             
