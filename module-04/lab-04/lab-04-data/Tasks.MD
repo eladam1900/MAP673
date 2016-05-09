@@ -1,29 +1,25 @@
-Mapping Scenario:
+                                        <b>Livestock in Kenya</b> 
 
-Lifestock in Kenya
-    -geocoded by district(point data)
-    -total of animals by group, and total(default) of animals per distirct 
-    -will need a query to filter through animal categories
-    -info window or popup with break down of animal catergories per district
-    -people interested in where the livestock agriculture centers are, what the make up of the 
-    -color code legend based on number of animals per category (including total)
-    -what about color code by top animal category per district
-        -sort and if x is top = color
-        -info window display in order based on sort
+Fred is curious about the state of the livestock sector in Kenya. He is interested to know what kinds of livestock is raised there, where they are, and how their numbers compare to each other. Where the most of each category are.
 
-What do I want to get out of this project?
-    -objective one - a view of the state of the livestock agriculture sector in Kenya
+<b>What do I want to get out of this project?</b>
+    -A view of the state of the livestock sector in Kenya
     
-What do I want the user to get out of it?
-    -objective one
+<b>What do I want the user to get out of it?</b>
+    -Locate the livestock hubs in Kenya, what livestock categories make up the market, and where each livestock category are the largest and smallest. 
     
-Content Requirements:
-    -one
+<b>Content Requirements:</b>
+    -Data displayed on simple basemaps providing basic geographic information including city locations and nation's borders
+    -Total number of each livestock category sorted by largest to smallest
+    -
     
-Functional Specifications:
-    -one
-    
-fred is curious about the state of agriculture in Kenya. He is interested to know what kinds of livestock is raised there, where they are, and how their numbers compare to each other. Where the most of each category are.
+<b>Functional Specifications:</b>
+    -Geocoded districts displayed as circles of varying and color based on the number and type of livestock per category
+    -Legend providing color code of livestock categories and parameters for the circle size breaks
+    -Query for user to narrow displayed data down to their selected livestock catergory
+    -Info window with a list of the livestock categories number per district. 
+    -Pop up detailing district name, county name and top livestock category produced 
+
 
 --query and larger markers per number (similar to energy facilities)
     --total same format larger markers, color coded by top category
@@ -31,5 +27,6 @@ fred is curious about the state of agriculture in Kenya. He is interested to kno
         --district 2 top categ is camel so blue
         
 very similar to energy map plus sort and query element
-
-popup could have district name, county name, province? top 3 animal categories and numbers
+popup could have district name, county name, province? top animal category and number
+total of animals by group, and total(default) of animals per distirct 
+people interested in where the livestock centers are, what the make up of the
