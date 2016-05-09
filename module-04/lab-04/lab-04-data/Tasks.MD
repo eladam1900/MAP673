@@ -8,7 +8,7 @@ Fred is curious about the state of the livestock sector in Kenya. He is interest
 <b>What do I want the user to get out of it?</b><br>
     -Locate the livestock hubs in Kenya, what livestock categories make up the market, and where each livestock category are the largest and smallest. 
     
-<b>Content Requirements:</b>
+<b>Content Requirements:</b><br>
     -Data displayed on simple basemaps providing basic geographic information including city locations and nation's borders
     -Total number of each livestock category sorted by largest to smallest
     -geocoded district locations
