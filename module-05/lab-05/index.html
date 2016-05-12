@@ -1,0 +1,254 @@
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>The Livestock Sector in Kenya</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
+    <script src='https://code.jquery.com/jquery-1.12.3.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.2.1/math.js"></script>
+    
+    <link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
+
+<style>
+    body {
+        margin:0; padding:0; 
+    }
+    #map {
+        position:absolute; 
+        top:0; 
+        bottom:0; 
+        width:100%; 
+    }
+    #textbox{
+        position: absolute;
+        margin-left: 59.5%;
+        margin-top: 0.25%;
+        background: white;
+        text-align:center;
+        border-radius: 5%;
+        height: 42%;
+        width: 40%;
+    }
+    h1{
+        font-family: sans-serif;
+        font-size: 1.5em;
+        
+    }
+    p{
+        font-family: sans-serif;
+        font-size: 1em;
+        
+    }
+    .legend{
+        padding: 6px 8px;
+        font-size: 1em;
+        background: rgba(75,75,75,0.8);
+        color: whitesmoke;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
+        width: 170px;
+    }
+    .legend h3{
+        font-size: 1.1em;
+        font-weight: bold;
+        line-height: 1em;
+        color: whitesmoke;
+        margin: 0;
+    }
+    .legend ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 12px 4px 0;
+    }
+    .legend li {
+        height: 22px;
+    }
+    .legend span{
+        width: 30px;
+        height: 20px;
+        float: left;
+        margin-right: 10px;
+    }
+    .infoWindow {
+        padding: 6px 8px;
+        font-size: 1em;
+        color: whitesmoke;
+        background: rgba(75,75,75,0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
+        text-align: right;   
+    }
+    .info h3 {
+        margin: 0;   
+    }
+</style>
+</head>
+    
+<body>
+    
+    <div id='map'></div>
+    <div id='textbox'>
+    <h1>Livestock and its Impact on the Kenyan Economy</h1>
+        <br>
+        <p>info</p>
+        <br><br>
+        <p>created and source</p>
+    </div>
+    <script>
+        
+        var totals = [];
+        
+        L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
+        var map = L.mapbox.map('map', 'mapbox.streets', {
+            center: [-.22, 42.8],
+            zoom: 6,
+            minZom: 6,
+            maxZoom: 9,
+            //maxBounds: L.latLngBounds([-6.22, 27.72], [5.76, 47.83])
+        });
+        
+        omnivore.csv('livestock.csv').on('ready', function(e) {
+            drawMap(e.target.toGeoJSON());
+        }).on('error', function(e){
+            console.log(e)
+        });
+        
+        function drawMap(livestockData) {
+           
+            //console.log(livestockData.features[i].properties)    
+            
+            var cattle = L.geoJson(livestockData, {
+                
+                pointToLayer: function(feature, latlng){
+                    
+                    return L.circleMarker(latlng, {
+                        color: 'red',
+                        opacity: 1,
+                        weight: 2,
+                        fillOpacity: 0.5,
+                        radius: getRadius()
+                    })
+                    
+                }
+                
+            }).addTo(map);
+            
+              
+        for(i=0; i <= 157; i++){
+        
+          var Total = livestockData.features[i].properties.Totals  
+          totals.push(Total)
+          
+          //livestockData.features[i].properties.Totals.sort(function(a,b){
+          //return b.properties.Totals - a.properties.Totals };
+          
+          };            
+        }
+   
+      function getRadius(){
+          var Sum = math.sum(totals)
+          var radius = (this.features[i].properties.Totals/Sum)*10;
+          return radius * .6;
+      }; 
+        
+        // function to get the color value
+         function getColor(d, breaks){
+             if(d <= "Cattle") {
+                 return '#f6eff7';
+             }else if(d <= "Sheep") {
+                 return '#bdc9e1';
+             }else if(d <= "Goats") {
+                 return '#67a9cf';
+             }else if(d <= "Camels") {
+                 return '#1c9099';
+             }else if(d <= "Donkeys") {
+                 return '#016c59';
+             }else if(d <= "Pigs") {
+                 return '#016c59';
+             }else if(d <= "Indigenous Chicken") {
+                 return '#016c59';
+             }else if(d <= "Chicken Commercial") {
+                 return '#016c59';
+             }else if(d <= "Bee Hives") {
+                 return '#016c59';
+             }
+            
+        }
+        
+                // function to draw the legend in top left corner
+        function drawLegend() {
+            
+            var legend = L.control({position: 'topleft'});
+            
+            legend.onAdd = function(map) {
+                
+                var div =  L.DomUtil.create('div', 'legend');
+                
+                return div;
+            };
+            
+            legend.addTo(map);
+        }
+        
+        //create info panel in top right corner of map
+        function drawInfo(){
+            
+            var info = L.control({ positon: 'topright'});
+            
+            info.onAdd = function(map){
+                
+                var div = L.DomUtil.create('div', 'info');
+                
+                return div;
+            }
+            
+            info.addTo(map);
+            $('.info').hide();
+        }
+        
+        // function to update the legend
+        function updateLegend(breaks) {
+            
+            var legend = $('.legend').html("<h3> Percent of Total Market: " + attribute + "</h3><ul>");
+            
+            for (var i = 0; i < breaks.length-1; i++) {
+                var color = getColor(breaks[i+ 1], breaks);
+                    $('.legend ul').append('<li><span style="background:' + color +'"></span> ' +
+                                          breaks[i].toLocaleString() + ' &mdash; ' +
+                                          breaks[i + 1].toLocaleString()  + " %" + '</li>');
+            }
+        
+            legend.append("</ul>");
+            
+        }
+        
+        //update info panel and define content
+        function updateInfo(layer){
+            var props = layer.feature.properties;
+            
+            var html = "<h3>"+props['NAME']+" County</h3>"+
+                        "2000: <b>"+ props["2000"]+" %"+"</b><br>"+
+                        "2001: <b>"+ props["2001"]+" %"+"</b><br>"+
+                        "2002: <b>"+ props["2002"]+" %"+"</b><br>"+
+                        "2003: <b>"+ props["2003"]+" %"+"</b><br>"+
+                        "2004: <b>"+ props["2004"]+" %"+"</b><br>"+
+                        "2005: <b>"+ props["2005"]+" %"+"</b><br>"+   
+                        "2006: <b>"+ props["2006"]+" %"+"</b><br>"+
+                        "2007: <b>"+ props["2007"]+" %"+"</b><br>"+
+                        "2008: <b>"+ props["2008"]+" %"+"</b><br>"+  
+                        "2009: <b>"+ props["2009"]+" %"+"</b><br>"+
+                        "2010: <b>"+ props["2010"]+" %"+"</b><br>"+
+                        "2011: <b>"+ props["2011"]+" %"+"</b><br>"+
+                        "2012: <b>"+ props["2012"]+" %"+"</b><br>"+
+                        "2013: <b>"+ props["2013"]+" %"+"</b>"   
+                        
+            $(".info").html(html);
+            
+        }
+
+        
+    </script>
+    
+</body>
+</html>
