@@ -22,12 +22,13 @@
     }
     #textbox{
         position: absolute;
-        margin-left: 59.5%;
-        margin-top: 0.25%;
-        background: white;
+        top: 5px;
+        right: 5px;
+        background: ghostwhite;
         text-align:center;
+        border: 1px solid black;
         border-radius: 5%;
-        height: 42%;
+        height: 55%;
         width: 40%;
     }
     h1{
@@ -40,64 +41,118 @@
         font-size: 1em;
         
     }
-    .legend{
+    #legend{
+        position: absolute;
+        top: 5px;
+        left: 40px;
         padding: 6px 8px;
         font-size: 1em;
-        background: rgba(75,75,75,0.8);
-        color: whitesmoke;
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        background: ghostwhite;
+        border: 1px solid black;
         border-radius: 5px;
         width: 170px;
     }
-    .legend h3{
+    #legend h3{
         font-size: 1.1em;
         font-weight: bold;
         line-height: 1em;
-        color: whitesmoke;
+        font-family: sans-serif;
+        color: black;
         margin: 0;
     }
-    .legend ul {
+    #legend ul {
         list-style-type: none;
         padding: 0;
         margin: 12px 4px 0;
     }
-    .legend li {
+    #legend li {
         height: 22px;
     }
-    .legend span{
+    #legend span{
         width: 30px;
         height: 20px;
         float: left;
         margin-right: 10px;
     }
-    .infoWindow {
+    #info {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        height: 40%;
+        width: 40%;
         padding: 6px 8px;
         font-size: 1em;
-        color: whitesmoke;
-        background: rgba(75,75,75,0.8);
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        font-family: sans-serif;
+        background: ghostwhite;
+        border: 1px solid black;
         border-radius: 5px;
-        text-align: right;   
+        text-align: left;   
+        z-index: 99;
     }
-    .info h3 {
+    #info h3 {
         margin: 0;   
+    }
+    #ui-controls{
+        position: absolute;
+        top: 187px;
+        left: 25px;
+        z-index: 99;
+        background: ghostwhite;
+        max-width: 200px;
+        height: 50px;
+        text-align: center;
+        border: 1px solid black;
+        border-radius: 5px;
+    }
+    #ui-controls label{
+        font-family: sans-serif;
+        background: ghostwhite;
+        font-size: .95em;
+        
     }
 </style>
 </head>
     
 <body>
     
+    <div id='ui-controls'> 
+     <label>Choose a livestock category:</label> 
+    <select id="Categories"> 
+         <option value="Cattle">Cattle</option> 
+         <option value="Sheep">Sheep</option> 
+         <option value="Goats">Goats</option> 
+         <option value="Camels">Camels</option> 
+         <option value="Donkeys">Donkeys</option> 
+         <option value="Pigs">Pigs</option>   
+         <option value="Indigenous Chicken">Indigenous Chickens</option>      
+         <option value="Chicken Commercial">Commercial Chickens</option>  
+         <option value="Bee Hive">Bees</option>   
+        <option value="Totals" selected>Total number of animals</option>   
+     </select> 
+    </div> 
+
     <div id='map'></div>
+    
     <div id='textbox'>
     <h1>Livestock and its Impact on the Kenyan Economy</h1>
+        <p>According to the xxx Kenya has the largest, most diversified economy in East Africa.contributing to mora than a fourth of the country's GDP.The livestock sector contributes about 10% of Kenya's overall GDP. </p>
         <br>
-        <p>info</p>
-        <br><br>
-        <p>created and source</p>
+        <p>created and sources: https://www.feedthefuture.gov/country/kenya</p>
     </div>
+    
+    <div id="info">
+    <p>County:</p>
+    </div>
+    
+    <div id="legend">
+    <h3>Title</h3>
+    <svg class="legend" width="200" height-"200"></svg>    
+    </div>
+    
     <script>
         
-        var totals = [];
+        var totals = [],
+            currentCategory;
         
         L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
         var map = L.mapbox.map('map', 'mapbox.streets', {
@@ -105,92 +160,136 @@
             zoom: 6,
             minZom: 6,
             maxZoom: 9,
-            //maxBounds: L.latLngBounds([-6.22, 27.72], [5.76, 47.83])
         });
         
         omnivore.csv('livestock.csv').on('ready', function(e) {
             drawMap(e.target.toGeoJSON());
         }).on('error', function(e){
             console.log(e)
-        });
-        
-        function drawMap(livestockData) {
-           
-            //console.log(livestockData.features[i].properties)    
             
-            var cattle = L.geoJson(livestockData, {
+        });
+           
+         //define labels for each livestock category 
+         var labels = {   
+             "Cattle": "<b>"+"Cattle'"+"</b>",  
+             "Sheep": "<b>"+"Sheep"+"</b>", 
+             "Goats": "<b>"+"Goats"+"</b>", 
+             "Camels": "<b>"+"Camels"+"</b>", 
+             "Donkeys": "<b>"+"Donkeys"+"</b>", 
+             "Pigs": "<b>"+"Pigs"+"</b>",   
+             "Indigenous Chicken": "<b>"+"Indigenous Chickens"+"</b>",    
+             "Chicken Commercial": "<b>"+"Commercial chickens"+"</b>", 
+             "Bee Hives": "<b>"+"Bees"+"</b>", 
+             "Totals": "Total number of animals per district" 
+        } 
+         
+        function drawMap(livestockData) {   
+            
+            var totalLS = L.geoJson(livestockData, {
                 
-                pointToLayer: function(feature, latlng){
+                pointToLayer: function(feature, layer){
                     
-                    return L.circleMarker(latlng, {
+                    return L.circleMarker(layer, {
                         color: 'red',
                         opacity: 1,
                         weight: 2,
-                        fillOpacity: 0.5,
-                        radius: getRadius()
+                        fillOpacity: 0,
+                        radius: getRadius(feature.properties.Totals)
+                        
+                    //console.log(feature.properties.Cattle)    
                     })
                     
                 }
                 
             }).addTo(map);
-            
-              
-        for(i=0; i <= 157; i++){
-        
-          var Total = livestockData.features[i].properties.Totals  
-          totals.push(Total)
-          
-          //livestockData.features[i].properties.Totals.sort(function(a,b){
-          //return b.properties.Totals - a.properties.Totals };
-          
-          };            
+               
+            buildUI();
+            updateLegend();
+            //drawInfo();
         }
    
-      function getRadius(){
-          var Sum = math.sum(totals)
-          var radius = (this.features[i].properties.Totals/Sum)*10;
-          return radius * .6;
-      }; 
+      function getRadius(val){
+          //console.log(val)
+        var radius = Math.sqrt(val/Math.PI);
+          return radius * .01;
+          
+      };
+           
+     function getColor(d, breaks){
+         if(d <= "Totals") {
+             return '#e31a1c';
+         }else if(d <= "Sheep") {
+             return '#377db8';
+         }else if(d <= "Goats") {
+             return '#4daf4a';
+         }else if(d <= "Camels") {
+             return '#984ea3';
+         }else if(d <= "Donkeys") {
+             return '#ff7f00';
+         }else if(d <= "Bee Hives") {
+             return '#ffff33';
+         }else if(d <= "Indigenous Chicken") {
+             return '#a65628';
+         }else if(d <= "Pigs") {
+             return '#f781bf';
+         }else if(d <= "Chicken Commercial") {
+             return '#999999';
+         }else if(d <= "Cattle") {
+             return '#ffffff';
+         }
+
+    }
+       
+    function buildUI(){
+         $('select[id="Categories"]').change(function(){
+             console.log($(this).val())
+            currentCategory = $(this).val();
+            drawMap();
+        })
+    }
         
-        // function to get the color value
-         function getColor(d, breaks){
-             if(d <= "Cattle") {
-                 return '#f6eff7';
-             }else if(d <= "Sheep") {
-                 return '#bdc9e1';
-             }else if(d <= "Goats") {
-                 return '#67a9cf';
-             }else if(d <= "Camels") {
-                 return '#1c9099';
-             }else if(d <= "Donkeys") {
-                 return '#016c59';
-             }else if(d <= "Pigs") {
-                 return '#016c59';
-             }else if(d <= "Indigenous Chicken") {
-                 return '#016c59';
-             }else if(d <= "Chicken Commercial") {
-                 return '#016c59';
-             }else if(d <= "Bee Hives") {
-                 return '#016c59';
-             }
+    function updateLegend() {
+        var radius,
+            allRadii = [];
+       /* for (i=0; i=157; i++){
+        this.eachLayer(function(layer) {
+          radius =
+console.log(layer.feature.properties[Cattle])  ;
+          layer.setRadius(radius);
+            allRadii.push(radius);
+        })
+            }*/
+    }    
+        // function to draw the legend in top left corner
+        function drawLegend(allRadii) {
+            var legend = $('.legend');
             
-        }
-        
-                // function to draw the legend in top left corner
-        function drawLegend() {
+            var circles = {
+                max: ss.max(allRadii),
+                median: ss.median(allRadii),
+                min: ss.min(allRadii)
+            }
+
+            var svgCircles = '';
             
-            var legend = L.control({position: 'topleft'});
+            var reverseCalc = function(radius) {
+                return Math.round((Math.pow(radius/scaleFactor, 2) * Math.PI));
+            }
             
-            legend.onAdd = function(map) {
+            for (var circle in circles) {
                 
-                var div =  L.DomUtil.create('div', 'legend');
-                
-                return div;
-            };
+                svgCircles += '<circle cx="'+ 80 +'" cy="'+ (circles[circle] - 140) * -1 +'" r="'+ circles[circle] + '" stroke="#1c9976" stroke-width="1" fill="ghostwhite" />';
+                  
+                 svgCircles += '<text x="'+ 60 +'" y = "'+ (circles[circle] - 120) * -1 +'" fill= "#1c9976">'+ reverseCalc(circles[circle]) +'</text>' 
+
+            }
+            
+            legend.html(svgCircles)
             
             legend.addTo(map);
-        }
-        
+            };
+            
+/*
         //create info panel in top right corner of map
         function drawInfo(){
             
@@ -210,7 +309,7 @@
         // function to update the legend
         function updateLegend(breaks) {
             
-            var legend = $('.legend').html("<h3> Percent of Total Market: " + attribute + "</h3><ul>");
+            var legend = $('.legend').html("<h3> Percent of Total Market: " + currentCategory + "</h3><ul>");
             
             for (var i = 0; i < breaks.length-1; i++) {
                 var color = getColor(breaks[i+ 1], breaks);
@@ -246,6 +345,7 @@
             $(".info").html(html);
             
         }
+*/
 
         
     </script>
