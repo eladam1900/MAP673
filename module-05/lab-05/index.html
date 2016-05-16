@@ -124,9 +124,9 @@
          <option value="Camels">Camels</option> 
          <option value="Donkeys">Donkeys</option> 
          <option value="Pigs">Pigs</option>   
-         <option value="Indigenous Chicken">Indigenous Chickens</option>      
-         <option value="Chicken Commercial">Commercial Chickens</option>  
-         <option value="Bee Hive">Bees</option>   
+         <option value="Indigenous_Chicken">Indigenous Chickens</option>      
+         <option value="Chicken_Commercial">Commercial Chickens</option>  
+         <option value="Bee_Hive">Bees</option>   
         <option value="Totals" selected>Total number of animals</option>   
      </select> 
     </div> 
@@ -146,13 +146,13 @@
     
     <div id="legend">
     <h3></h3>
-    <svg class="legend" width="200" height-"200"></svg>    
+    <svg class="legend" width="200" height="200"></svg>    
     </div>
     
     <script>
         
         var totals = [],
-            currentCategory;
+            currentCategory = 'Totals';
         
         L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
         var map = L.mapbox.map('map', 'mapbox.streets', {
@@ -193,8 +193,8 @@
                         color: 'red',
                         opacity: 1,
                         weight: 2,
-                        fillOpacity: 0,
-                        radius: getRadius(feature.properties.Totals)
+                        fillOpacity: 0
+                       
                         
                     //console.log(feature.properties.Cattle)    
                     })
@@ -203,48 +203,55 @@
                 
             }).addTo(map);
                
-            buildUI();
+            buildUI(totalLS);
             updateLegend();
-            drawInfo();
+//            drawInfo();
+            updateMap(totalLS);
         }
-   
+        function updateMap(totalLS) {
+            totalLS.eachLayer(function(layer) {
+               layer.setRadius(getRadius(Number(layer.feature.properties[currentCategory])));
+               layer.setStyle({color: getColor()})
+            });
+        }
       function getRadius(val){
-          //console.log(val)
+        
         var radius = Math.sqrt(val/Math.PI);
           return radius * .01;
           
       };
            
-     function getColor(d,){
-         if(d <= "Totals") {
+     function getColor(){
+         var d = currentCategory;
+         if(d == "Totals") {
              return '#e31a1c';
-         }else if(d <= "Sheep") {
+         }else if(d == "Sheep") {
              return '#377db8';
-         }else if(d <= "Goats") {
+         }else if(d == "Goats") {
              return '#4daf4a';
-         }else if(d <= "Camels") {
+         }else if(d == "Camels") {
              return '#984ea3';
-         }else if(d <= "Donkeys") {
+         }else if(d == "Donkeys") {
              return '#ff7f00';
-         }else if(d <= "Bee Hives") {
+         }else if(d == "Bee_Hives") {
              return '#ffff33';
-         }else if(d <= "Indigenous Chicken") {
+         }else if(d == "Indigenous_Chicken") {
              return '#a65628';
-         }else if(d <= "Pigs") {
+         }else if(d == "Pigs") {
              return '#f781bf';
-         }else if(d <= "Chicken Commercial") {
+         }else if(d == "Chicken_Commercial") {
              return '#999999';
-         }else if(d <= "Cattle") {
+         }else if(d == "Cattle") {
              return '#ffffff';
          }
 
     }
        
-    function buildUI(){
+    function buildUI(totalLS){
          $('select[id="Categories"]').change(function(){
              console.log($(this).val())
             currentCategory = $(this).val();
-            drawMap();
+            updateMap(totalLS);
         })
     }
         
