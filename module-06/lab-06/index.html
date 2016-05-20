@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>673 Module 06 CartoDB Starter Template</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+    
+    <style>
+      html, body, #map {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+        #header{
+            position: absolute;
+            background: 'black';
+            text-align: center;
+            
+                
+        }    
+    </style>
+</head>
+<body>
+    
+    <div id="map"></div>
+    <div id="header">High School Graduate Rates in the US</div>
+
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
+    <script>
+        
+        var map = new L.Map("map", {
+           center: [-10,5],
+            zoom: 4.5
+        });
+        
+        var url = 'https://eladams87.cartodb.com/api/v2/viz/6ed46524-a1d7-11e5-b6a1-0ecd1babdde5/viz.json';
+        
+  /*      cartodb.createVis('map', url).done(function(vis, layers){
+            console.log(vis, layers)
+        });*/
+        
+        cartodb.createLayer(map, url).addTo(map);
+
+    </script>
+</body>
+</html>
