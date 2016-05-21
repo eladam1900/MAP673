@@ -157,7 +157,7 @@
         L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
         var map = L.mapbox.map('map', 'mapbox.streets', {
             center: [-.22, 42.8],
-            zoom: 6,
+            zoom: 7,
             minZom: 6,
             maxZoom: 9,
         });
@@ -217,7 +217,7 @@
       function getRadius(val){
         
         var radius = Math.sqrt(val/Math.PI);
-          return radius * .01;
+          return radius * .05;
           
       };
            
@@ -232,24 +232,23 @@
          }else if(d == "Camels") {
              return '#984ea3';
          }else if(d == "Donkeys") {
-             return '#ff7f00';
+             return '#004529';
          }else if(d == "Bee_Hives") {
              return '#ffff33';
          }else if(d == "Indigenous_Chicken") {
              return '#a65628';
          }else if(d == "Pigs") {
-             return '#f781bf';
+             return '#c51b8a';
          }else if(d == "Chicken_Commercial") {
-             return '#999999';
+             return '#cc4c02';
          }else if(d == "Cattle") {
-             return '#ffffff';
+             return '#636363';
          }
 
     }
        
     function buildUI(totalLS){
          $('select[id="Categories"]').change(function(){
-             console.log($(this).val())
             currentCategory = $(this).val();
             updateMap(totalLS);
         })
