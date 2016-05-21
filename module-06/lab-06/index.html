@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>673 Module 06 CartoDB Starter Template</title>
+    <title>US Drop Out Rates</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 
@@ -13,35 +13,92 @@
         padding: 0;
         margin: 0;
       }
-        #header{
+      #header{
+        position: absolute;
+        background: 'black';
+        top: 20px;
+        left: 40px;
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 1.5em;
+        font-weight: bold;  
+      }    
+      #map{
+        background: 'lightgrey';    
+      }
+      #describe{
+        position: absolute;
+        bottom: 20px;
+        left: 30px;  
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 1em;
+        background: 'black';
+      }    
+        #state-styles{
             position: absolute;
-            background: 'black';
-            text-align: center;
-            
-                
         }    
     </style>
 </head>
 <body>
     
     <div id="map"></div>
-    <div id="header">High School Graduate Rates in the US</div>
+    <div id="header">High School Drop Out Rates in the US</div>
+    <div id="describe">Map created by Elizabeth Adams in May 2016</div>
 
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
+    
+    <script type="cartocss/html" id="state-styles">    
+        #us_education_merge{
+            polygon-fill: steelblue;
+            polygon-opacity: 0.8;
+            line-color: #FFF;
+            line-width: 0.5;
+            line-opacity: 1;
+            }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 100] {
+           polygon-fill: #B10026;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 90] {
+           polygon-fill: #E31A1C;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 80] {
+           polygon-fill: #FC4E2A;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 70] {
+           polygon-fill: #FD8D3C;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 60] {
+           polygon-fill: #FEB24C;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 50] {
+           polygon-fill: #FED976;
+        }
+        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 40] {
+           polygon-fill: #FFFFB2;
+        }
+    </script> 
+    
     <script>
         
         var map = new L.Map("map", {
-           center: [-10,5],
+           center: [38,-95],
             zoom: 4.5
-        });
+        })   
         
-        var url = 'https://eladams87.cartodb.com/api/v2/viz/6ed46524-a1d7-11e5-b6a1-0ecd1babdde5/viz.json';
+        var sourceObject = {
+            user_name: "eladams87",
+            type: 'cartodb',
+            sublayers:[
+                {
+                    sql: "SELECT * FROM us_education_merge",
+                    cartocss: $("#state-styles").text()
+                    
+                }
+            ]
+        }
         
-  /*      cartodb.createVis('map', url).done(function(vis, layers){
-            console.log(vis, layers)
-        });*/
-        
-        cartodb.createLayer(map, url).addTo(map);
+        cartodb.createLayer(map, sourceObject).addTo(map);
 
     </script>
 </body>
