@@ -13,6 +13,9 @@
         padding: 0;
         margin: 0;
       }
+        #map{
+            background: #3d3d3d;
+        }
     </style>
 </head>
 <body>
@@ -21,7 +24,35 @@
 
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
     <script>
-
+        
+        var map = new L.Map("map", {
+            center: [38,-95],
+            zoom: 4.5
+        })
+        
+        var cartoCSS = '#deathsbycounty{'+
+            'polygon-fill: steelblue;'+
+            'polygon-opacity: 0.8;'+
+            'line-color: #FFF;'+
+            'line-width: 0.5;'+
+            'line-opacity: 1;'+
+            '}';
+        
+        var sourceObject = {
+            username: '<eladams87>',
+            type: cartodb,
+            sublayers: [
+                {
+                    sql: "SELECT * FROM deathsbycounty",
+                    cartocss: cartoCSS
+                }
+            ]
+        }
+        
+        cartodb.createLayer(map, sourceObject).addTo(map);
+        
+        
+        
     </script>
 </body>
 </html>
