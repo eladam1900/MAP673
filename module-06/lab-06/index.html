@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>US Drop Out Rates</title>
+    <title>US Graduation Rates</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 
@@ -15,25 +15,37 @@
       }
       #header{
         position: absolute;
-        background: 'black';
+        color: 'black';
         top: 20px;
         left: 40px;
         text-align: center;
         font-family: sans-serif;
         font-size: 1.5em;
         font-weight: bold;  
+      }
+      #info{
+        position: absolute;
+        bottom: 100px;
+        left: 20px;
+        max-height: 250px;
+        max-width: 250px;
+        text-align: left;
+        font-family: sans-serif;
+        font-size: 1em;
+        color: 'black';  
+          
       }    
       #map{
         background: 'lightgrey';    
       }
-      #describe{
+      #Source{
         position: absolute;
-        bottom: 20px;
-        left: 30px;  
+        bottom: 40px;
+        left: 20px;  
         text-align: center;
         font-family: sans-serif;
         font-size: 1em;
-        background: 'black';
+        color: 'black';
       }    
         #state-styles{
             position: absolute;
@@ -43,39 +55,40 @@
 <body>
     
     <div id="map"></div>
-    <div id="header">High School Drop Out Rates in the US</div>
-    <div id="describe">Map created by Elizabeth Adams in May 2016</div>
+    <div id="header">High School Graduation Rates in the US</div>
+    <div id="info"><p>This map shows the national high school graduation rates for the 2013-2014 school year. These rates were provided by the Department of Education.</p></div>
+    <div id="Source">Map created by Elizabeth Adams in May 2016</div>
 
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
     
     <script type="cartocss/html" id="state-styles">    
         #us_education_merge{
-            polygon-fill: steelblue;
-            polygon-opacity: 0.8;
+            polygon-fill: #F1EEF6;
+            polygon-opacity: 1;
             line-color: #FFF;
-            line-width: 0.5;
+            line-width: 1;
             line-opacity: 1;
             }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 100] {
+        #us_education_merge [ graduation <= 88.6] {
            polygon-fill: #B10026;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 90] {
-           polygon-fill: #E31A1C;
+        #us_education_merge [ graduation <= 87.3] {
+           polygon-fill: #91003f;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 80] {
-           polygon-fill: #FC4E2A;
+        #us_education_merge [ graduation <= 86.4] {
+           polygon-fill: #ce1256;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 70] {
-           polygon-fill: #FD8D3C;
+        #us_education_merge [ graduation <= 85.3] {
+           polygon-fill: #e7298a;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 60] {
-           polygon-fill: #FEB24C;
+        #us_education_merge [ graduation <= 81] {
+           polygon-fill: #df65b0;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 50] {
-           polygon-fill: #FED976;
+        #us_education_merge [ graduation <= 77.3] {
+           polygon-fill: #c994c7;
         }
-        #us_education_merge [ high_school_graduation_rate_all_students_2013_14 <= 40] {
-           polygon-fill: #FFFFB2;
+        #us_education_merge [ graduation <= 72] {
+           polygon-fill: #d4b9da;
         }
     </script> 
     
@@ -98,7 +111,12 @@
             ]
         }
         
-        cartodb.createLayer(map, sourceObject).addTo(map);
+        cartodb.createLayer(map, sourceObject, {
+            legends: true,
+            infowindow: true,
+            //cartodb-logo: false,
+            
+        }).addTo(map);
 
     </script>
 </body>
