@@ -47,9 +47,9 @@
         font-size: 1em;
         color: 'black';
       }    
-        #state-styles{
+      #state-styles{
             position: absolute;
-        }    
+      }     
     </style>
 </head>
 <body>
@@ -58,6 +58,8 @@
     <div id="header">High School Graduation Rates in the US</div>
     <div id="info"><p>This map shows the national high school graduation rates for the 2013-2014 school year. These rates were provided by the Department of Education.</p></div>
     <div id="Source">Map created by Elizabeth Adams in May 2016</div>
+    <div id="legends"></div>
+    <div id="infoWindow"></div>
 
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
     
@@ -111,12 +113,7 @@
             ]
         }
         
-        cartodb.createLayer(map, sourceObject, {
-            legends: true,
-            infowindow: true,
-            //cartodb-logo: false,
-            
-        }).addTo(map);
+        cartodb.createLayer(map, sourceObject).addTo(map);
 
     </script>
 </body>
