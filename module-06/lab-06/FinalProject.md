@@ -11,4 +11,7 @@ There will be a pop-up for the wells and water sources/test sites (on.click), an
 Since all of the data is based in a region of Kentucky. the map will open zoomed into that area, and will not be pannable. <br>
 
 <b>Data source</b><br>
-Kentucky Geological Survey data tables. A sample of the the oil and gas well data is made available as an excel sheet. 
+Kentucky Geological Survey data tables. A sample of the the oil and gas well data is made available as an excel sheet. <br>
+
+<b>Technology used</b><br>
+After my data queires are built in SQL accessing various databases within the KGS system I will export the data into several excel sheets for more fine tuning. These excel workbooks will then be saved as CSV files for use with Mapbox and Leaflet APIs. I would like to include some graph and query functionality, so I will also be using jQuery and Highcharts to instantiate those functions. My final product will be hosted using GitHub Pages.
