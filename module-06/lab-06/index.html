@@ -71,7 +71,7 @@
             line-width: 1;
             line-opacity: 1;
             }
-        #us_education_merge [ graduation <= 88.6] {
+        #us_education_merge [ graduation <= 90.6] {
            polygon-fill: #B10026;
         }
         #us_education_merge [ graduation <= 87.3] {
@@ -95,7 +95,7 @@
     </script> 
     
     <script>
-        
+
         var map = new L.Map("map", {
            center: [38,-95],
             zoom: 4.5
@@ -113,7 +113,20 @@
             ]
         }
         
-        cartodb.createLayer(map, sourceObject).addTo(map);
+        cartodb.createLayer(map, sourceObject, {
+            legends: true
+            
+        }).addTo(map)
+        .done(function(layer){
+            
+            var choroplethLegend = new cdb.geo.ui.Legend.Choropleth({ 
+              title: "Graduation Rates", 
+              left: "74.60", right: "90.50", 
+              colors: [ "#d4b9da", "#c994c7", "#df65b0", "#e7298a", "#ce1256", "#91003f", "#B10026" ] 
+             });
+            
+            $('map').append(choroplethLegend.render().el);
+        });
 
     </script>
 </body>
