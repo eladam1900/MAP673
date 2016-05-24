@@ -54,7 +54,9 @@
 </head>
 <body>
     
-    <div id="map"></div>
+    <div id="map">
+        <div id="legend"></div>
+    </div>
     <div id="header">High School Graduation Rates in the US</div>
     <div id="info"><p>This map shows the national high school graduation rates for the 2013-2014 school year. These rates were provided by the Department of Education.</p></div>
     <div id="Source">Map created by Elizabeth Adams in May 2016</div>
@@ -125,7 +127,7 @@
               colors: [ "#d4b9da", "#c994c7", "#df65b0", "#e7298a", "#ce1256", "#91003f", "#B10026" ] 
              });
             
-            $('map').append(choroplethLegend.render().el);
+            $('#legend').append(choroplethLegend.render().el);
         });
 
     </script>
