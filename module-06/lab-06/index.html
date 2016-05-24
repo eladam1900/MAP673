@@ -99,7 +99,7 @@
     <script>
 
         var map = new L.Map("map", {
-           center: [38,-95],
+           center: [0,0],
             zoom: 4.5
         })   
         
@@ -108,7 +108,7 @@
             type: 'cartodb',
             sublayers:[
                 {
-                    sql: "SELECT * FROM us_education_merge",
+                    sql: "SELECT ST_Transform(the_geom, 2163) AS the_geom_webmercator, cartodb_id, graduation FROM us_education_merge",
                     cartocss: $("#state-styles").text()
                     
                 }
