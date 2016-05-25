@@ -36,17 +36,29 @@
             top: 60px;
             font-size: 1.2em;
         }
+        .slider{
+            width: 300px;
+            margin-left: 223px;
+        }
+        #emission-value{
+            margin-left: 223px;
+        }
     </style>
 </head>
 <body>
+    <div id="map"></div>
+    <input type="range" class="slider">
+    <div id="emission-value"></div>
+    
     <h1>US Counties</h1>
     <h2></h2>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
     
 <script>
     queue()
-        .defer(d3.json, 'us-counties.json')
+        .defer(d3.json, 'us-counties-topo.json')
         .defer(d3.json, "na_land_clipped.json")
         .defer(d3.csv, "direct-emitters.csv")
         .await(makeMap);
@@ -58,7 +70,7 @@
                 .attr("width", width)
                 .attr("height", height);
     
-    var projection = d3.geo.albersUsa()
+    var projection = d3.geo.albers()
                        .scale(800)
                        .translate([width/2, height/2]);
     
@@ -66,7 +78,20 @@
                         .projection(projection);
     
       function makeMap(error, counties, na, emitters){
+          
+        var data = [];
+          
+        emitters.forEach(function(emitter) {
+            data.push(Number(emitter.total_emissions));  
+        }) ;
         
+        var min = Math.min.apply(Math, data),
+            max = Math.max.apply(Math, data);
+          
+        var radius = d3.scale.sqrt()
+            .domain([min, max])
+            .range([3, 20]);
+          
         svg.append("g")
             .selectAll("path")
             .data(na.features)
@@ -77,26 +102,29 @@
           
         svg.append("g")
             .selectAll("path")
-            .data(counties.features)
+            .data(topojson.feature(counties, counties.objects.counties).features)
             .enter()
             .append("path")
             .attr("d", geoPath)
             .attr("class", "county");
           
-        svg.append("g")
-            .selectAll("circle")
-            .data(emitters)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d){
-                d.position = projection([d.lon, d.lat])
-                return d.position[0];
-        })
-        .attr("cy", function(d){
-            return d.position[1];
-        })
-        .attr("r", 1)
-        .attr('class', "emitter");
+        var facilites = svg.append("g")
+                .selectAll("circle")
+                .data(emitters)
+                .sort(function(a, b) {
+                    return b.properties.total_emissions - a.properties.total_emissions;
+                })
+                .enter()
+                .append("circle")
+                .attr("cx", function(d){
+                    d.position = projection([d.lon, d.lat])
+                    return d.position[0];
+            })
+            .attr("cy", function(d){
+                return d.position[1];
+            })
+            .attr("r", 1)
+            .attr('class', "emitter");
       }
     
 </script>
