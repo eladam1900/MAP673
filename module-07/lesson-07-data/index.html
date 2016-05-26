@@ -77,7 +77,7 @@
     var geoPath = d3.geo.path()
                         .projection(projection);
     
-      function makeMap(error, counties, na, emitters){
+    function makeMap(error, counties, na, emitters){
           
         var data = [];
           
@@ -108,10 +108,10 @@
             .attr("d", geoPath)
             .attr("class", "county");
           
-        var facilites = svg.append("g")
-                .selectAll("circle")
-                .data(emitters)
-                .sort(function(a, b) {
+        svg.append("g")
+             .selectAll("circle")
+             .data(emitters)
+             .sort(function(a, b) {
                     return b.properties.total_emissions - a.properties.total_emissions;
                 })
                 .enter()
@@ -123,7 +123,9 @@
             .attr("cy", function(d){
                 return d.position[1];
             })
-            .attr("r", 1)
+            .attr("r", function(d) {
+                return radius(d.total_emissons)
+        })
             .attr('class', "emitter");
       }
     
