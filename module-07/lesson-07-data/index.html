@@ -11,61 +11,45 @@
             background: whitesmoke;
             font-family: Montserrat, sans-serif;
         }
-        .county{
-            fill: #005DAA;
-            stroke: #fff;
-        }
-        .hover{
-            fill: yellow;        
+        #map{
+            width: 900px;
+            height: 600px;
+            margin: 10px auto;
+            border: 1px solid #d3d3d3;
         }
         .land{
             fill: #d3d3d3;
-        }
-        .emitter{
-            fill: yellow;
-        }
-        h1, h2 {
-            position: absolute;
-            left: 20px;
-            top: 10px;
-            font-size: 2em;
-            font-weight: 100;
-            color: #005DAA;
-        }
-        h2 {
-            top: 60px;
-            font-size: 1.2em;
-        }
-        .slider{
-            width: 300px;
-            margin-left: 223px;
-        }
-        #emission-value{
-            margin-left: 223px;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
-    <input type="range" class="slider">
+ <!--   <input type="range" class="slider">
     <div id="emission-value"></div>
     
     <h1>US Counties</h1>
-    <h2></h2>
+    <h2></h2>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/0.9.0/simple_statistics.min.js"></script>
     
 <script>
     queue()
-        .defer(d3.json, 'us-counties-topo.json')
+       // .defer(d3.json, 'us-counties-topo.json')
+        .defer(d3.json, "https://rgdonohue.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM uninsured_adults_county")
         .defer(d3.json, "na_land_clipped.json")
-        .defer(d3.csv, "direct-emitters.csv")
+      //  .defer(d3.csv, "direct-emitters.csv")
         .await(makeMap);
     
     var width = 900, height = 600;
     
     var svg = d3.select("body")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+    
+    var svg = d3.select("#map")
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
@@ -77,20 +61,22 @@
     var geoPath = d3.geo.path()
                         .projection(projection);
     
-    function makeMap(error, counties, na, emitters){
-          
-        var data = [];
-          
-        emitters.forEach(function(emitter) {
-            data.push(Number(emitter.total_emissions));  
-        }) ;
+    function makeMap(error, counties, na){
         
-        var min = Math.min.apply(Math, data),
-            max = Math.max.apply(Math, data);
-          
-        var radius = d3.scale.sqrt()
-            .domain([min, max])
-            .range([3, 20]);
+        var breaks = ss.jenks(counties.features.map(function(d){
+                return d.properties.uninsured;
+            }), 5);
+        
+        breaks.shift();
+        breaks.pop();
+        
+        console.log(breaks);
+        
+        var colors = ["#feedde", "#fdbe85", "#fd8d3c", "#e6550d", "#a63603"];
+        
+        var jenks = d3.scale.threshold()
+            .domain(breaks)
+            .range(colors);    
           
         svg.append("g")
             .selectAll("path")
@@ -102,31 +88,15 @@
           
         svg.append("g")
             .selectAll("path")
-            .data(topojson.feature(counties, counties.objects.counties).features)
+            .data(counties.features)
             .enter()
             .append("path")
             .attr("d", geoPath)
-            .attr("class", "county");
-          
-        svg.append("g")
-             .selectAll("circle")
-             .data(emitters)
-             .sort(function(a, b) {
-                    return b.properties.total_emissions - a.properties.total_emissions;
-                })
-                .enter()
-                .append("circle")
-                .attr("cx", function(d){
-                    d.position = projection([d.lon, d.lat])
-                    return d.position[0];
-            })
-            .attr("cy", function(d){
-                return d.position[1];
-            })
-            .attr("r", function(d) {
-                return radius(d.total_emissions)
-        })
-            .attr('class', "emitter");
+            .attr("class", "county")
+            .attr("fill", function(d){
+                return jenks(d.properties.uninsured);
+        });
+        
       }
     
 </script>
