@@ -1,15 +1,14 @@
-<!DOCTYPE html>
 <html>
 <head>
 <meta charset=utf-8 />
-<title>A simple map</title>
+<title>Berea Wells</title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
     
 <style>
-  body 
+    body 
     { margin:0; 
       padding:0; 
     }
@@ -35,7 +34,7 @@
         top:100px;
         border: solid 1px black;
         width:29%;
-        height: 50%
+        height: 50%;
     }
     #sidepanel p{
         font-family: sans-serif;
@@ -59,14 +58,16 @@
 <div id='map'></div>
     <div id="sidepanel">
         <p>Over the past several years there has been a drilling boom in Northeastern Kentucky. Most of these wells have been drilled into the Berea Sandstone which produces oil and gas. Nationally there has also been a rise in concerns over the drilling practice known as fracking, and it's effects on the environment. More specifically the public has been concerned with induced seismicity (earthquakes caused by human events) and groundwater contamination.<br><br>This map is designed to give users access to the various well documents and analysis reports for both the water and the oil and gas wells.</p></div>
-<div id="legend"></div>    
-<script
+<div id="legend"></div> 
+    
+<script>
 L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
 var map = L.mapbox.map('map', 'mapbox.outdoors')
-    .setView([37.9, -83.2], 9);
+    .setView([38.2, -83.2], 9);
         
 omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv').addTo(map);
 omnivore.csv('WaterWells.csv').addTo(map);
+omnivore.topojson('us-counties-topo.json').addTo(map);
 
         
 </script>
