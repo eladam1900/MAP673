@@ -62,13 +62,77 @@
     
 <script>
 L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
-var map = L.mapbox.map('map', 'mapbox.outdoors')
-    .setView([38.2, -83.2], 9);
+var map = L.mapbox.map('map', 'mapbox.outdoors',{
+                   center:[38.2, -83.2],
+                   zoom: 9,
+                   minZoom: 9,
+                   maxZoom: 17
+            });
+    
+//omnivore.topojson('us-counties-topo.json').addTo(map);
+    
+var OGWells = omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv')
+                    .on('ready', function(e) {
+                        drawMap(e.target.toGeoJSON())
+                    })
+                    .on('error', function(e){
+                        console.log(e.error[0].message);
+                    });
+    
+var WaterWells = omnivore.csv('WaterWells.csv') 
+                        .on('ready', function(e) {
+                        drawMap(e.target.toGeoJSON()) //console.log works here
+                    })
+                    .on('error', function(e){
+                        console.log(e.error[0].message);
+                    });
+    
+function drawMap(OGWells, WaterWells) {
+    console.log(OGWells)
+     console.log(WaterWells)
+    og = L.geoJson(OGWells, {
         
-omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv').addTo(map);
-omnivore.csv('WaterWells.csv').addTo(map);
-omnivore.topojson('us-counties-topo.json').addTo(map);
+    pointToLayer: function(feature, layer){
+        return L.circleMarker(layer,{
+            color: '#956bb2',
+            opacity: 1,
+            fillOpacity: 1,
+            radius: 3
+        });
+    }    
+        
+    }).addTo(map);
+    
+    ww  = L.geoJson(WaterWells, {
+       
+    pointToLayer: function(feature, layer){
+            return L.circleMarker(layer, {
+                color: '#2f5997',
+                opacity: 1,
+                fillOpacity: 1,
+                radius: 3
+            });
+        }
+        
+    }).addTo(map);
+}    
 
+function UpdateMarker (){
+    //determine marker color based on TD field for og
+    // ditto for ww
+}    
+    
+function DrawLegend(){
+    //draw chloropleth legned for both layers
+}    
+    
+function Popups () {
+    //format pop-ups
+}    
+    
+function RadiusCircle (){
+    //create set radius around a well on.click
+}    
         
 </script>
 
