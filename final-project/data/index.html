@@ -71,21 +71,21 @@ var map = L.mapbox.map('map', 'mapbox.outdoors',{
     
 //omnivore.topojson('us-counties-topo.json').addTo(map);
     
-var OGWells = omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv')
-                    .on('ready', function(e) {
-                        drawMap(e.target.toGeoJSON())
-                    })
-                    .on('error', function(e){
-                        console.log(e.error[0].message);
-                    });
+omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv')
+    .on('ready', function(ogWells)
+        omnivore.csv('WaterWells.csv') 
+            .on('ready', function(waterWells) {
+                drawMap(ogWells.target.toGeoJSON(), waterWells.target.toGeoJSON()) //console.log works here
+            })
+            .on('error', function(e){
+                console.log(e.error[0].message);
+            });
+    })
+    .on('error', function(e){
+        console.log(e.error[0].message);
+    });
     
-var WaterWells = omnivore.csv('WaterWells.csv') 
-                        .on('ready', function(e) {
-                        drawMap(e.target.toGeoJSON()) //console.log works here
-                    })
-                    .on('error', function(e){
-                        console.log(e.error[0].message);
-                    });
+
     
 function drawMap(OGWells, WaterWells) {
     console.log(OGWells)
