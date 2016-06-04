@@ -69,28 +69,32 @@ var map = L.mapbox.map('map', 'mapbox.outdoors',{
                    maxZoom: 17
             });
     
-//omnivore.topojson('us-counties-topo.json').addTo(map);
+var customLayer = L.geoJson(null, {
+    fillOpacity:0,
+    color: 'black'
+})    
+omnivore.topojson('ky-counties-topo.json', null, customLayer).addTo(map);
     
 omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv')
-    .on('ready', function(ogWells)
-        omnivore.csv('WaterWells.csv') 
+    .on('ready', function(ogWells){
+        omnivore.csv('WaterWells_latlong.csv') 
             .on('ready', function(waterWells) {
-                drawMap(ogWells.target.toGeoJSON(), waterWells.target.toGeoJSON()) //console.log works here
+                drawMap(ogWells.target.toGeoJSON(), waterWells.target.toGeoJSON()) 
             })
-            .on('error', function(e){
-                console.log(e.error[0].message);
-            });
-    })
-    .on('error', function(e){
-        console.log(e.error[0].message);
+
+            .on('error', function(waterWells){
+                console.log(waterWells.error[0].message);
+            })
+}
+    )
+    .on('error', function(ogWells){
+        console.log(ogWells.error[0].message);
     });
     
-
-    
-function drawMap(OGWells, WaterWells) {
-    console.log(OGWells)
-     console.log(WaterWells)
-    og = L.geoJson(OGWells, {
+function drawMap(ogWells, waterWells) {
+    console.log(ogWells)
+     console.log(waterWells)
+    og = L.geoJson(ogWells, {
         
     pointToLayer: function(feature, layer){
         return L.circleMarker(layer,{
@@ -103,7 +107,7 @@ function drawMap(OGWells, WaterWells) {
         
     }).addTo(map);
     
-    ww  = L.geoJson(WaterWells, {
+    ww  = L.geoJson(waterWells, {
        
     pointToLayer: function(feature, layer){
             return L.circleMarker(layer, {
