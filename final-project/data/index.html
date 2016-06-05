@@ -101,9 +101,6 @@
     
 <script>
     
-var og,
-    ww
-    
 L.mapbox.accessToken = 'pk.eyJ1IjoiZWxhZGFtMTkwMCIsImEiOiJjaW50MXFnZG4xMWZjdWttM2Nucmduc3E3In0.2v3TohBE2ysztKSUSjhHpg';
 var map = L.mapbox.map('map', 'mapbox.outdoors',{
                    center:[38.2, -83.2],
@@ -139,16 +136,13 @@ omnivore.csv('BereaWells_John_Green_Law_Cleaned.csv')
 function drawMap(ogWells, waterWells) {
     //console.log(ogWells)
      //console.log(waterWells)
-     
-      var breaks = getBreaks();
     
     og = L.geoJson(ogWells, {
         
     pointToLayer: function(feature, layer){
         return L.circleMarker(layer,{
             color: '#d3d3d3',
-            //fillColor: '#956bb2', 
-            fillColor: ogMarker(feature.properties.total_depth),
+            fillColor: '#956bb2', 
             stroke: 0.5,
             opacity: 1,
             fillOpacity: 1,
@@ -158,19 +152,12 @@ function drawMap(ogWells, waterWells) {
         
     }).addTo(map);
     
-    eachLayer(function(layer) {
-
-        console.log(layer.feature.properties);
-
-    });
-    
     ww  = L.geoJson(waterWells, {
        
     pointToLayer: function(feature, layer){
             return L.circleMarker(layer, {
                 color: '#d3d3d3',
-                //fillColor: '#2f5997',  
-                fillColor: waterMarker(feature.properties.Total_Depth),
+                fillColor: '#2f5997',  
                 stroke: 0.5,
                 opacity: 1,
                 fillOpacity: 1,
@@ -180,63 +167,7 @@ function drawMap(ogWells, waterWells) {
         
     }).addTo(map);
 
-}    
-  
-function getBreaks (){
-    
-    var values=[];
-    
-    og.eachLayer(function(layer){
-        var value = feature.properties.total_depth
-        values.push(value);
-        
-    });
-    console.log(values)
-    ww.eachLayer(function(layer){
-        var value = feature.properties.total_depth
-        values.push(value);
-    console.log(values)    
-    });
-        var clusters = ss.ckmeans(values, 5);
-        
-    var breaks = clusters.map(function(cluster){
-        return [cluster[0],cluster.pop()];
-    });
-    
-    return breaks;
-}    
-    
-function ogMarker (d, breaks){
-    
-    if(d <= breaks[0][1]){
-        return '#f2f0f7'
-    }else if (d <= breaks [1][1]){
-        return '#cbc9e2'
-    }else if (d <= breaks [2][1]){
-        return '#9e9ac8'
-    }else if (d <= breaks[3][1]){
-        return '#756bb1'
-    }else if (d <= breaks[4][1]){
-        return '#54278f'
-    }
-        
-}
-    
-function waterMarker (d, breaks){
-    
-    if(d <= breaks[0][1]){
-        return '#F1EEF6'
-    }else if (d <= breaks [1][1]){
-        return '#BDC9E1'
-    }else if (d <= breaks [2][1]){
-        return '#74A9CF'
-    }else if (d <= breaks[3][1]){
-        return '#2B8CBE'
-    }else if (d <= breaks[4][1]){
-        return '#045A8D'
-    }
-        
-}        
+}               
     
 function Popups () {
     //format pop-ups
